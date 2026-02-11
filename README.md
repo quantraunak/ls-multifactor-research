@@ -1,82 +1,75 @@
-# Multi-Factor Long/Short U.S. Equity Strategy
+# Multi-Factor Long/Short U.S. Equity Strategy (Recruiter-Grade Backtest)
 
-April 2025
+A realistic, local, reproducible multi-factor long/short US equity backtesting framework.
 
-## Strategy Overview
+- Dollar-neutral, monthly rebalance
+- Walk-forward training, no lookahead bias
+- Mean-variance optimizer with beta-neutrality and turnover penalty
+- Free data only (Yahoo Finance default; Stooq optional)
 
-Long/short equity strategy on the Russell 1000 using factor-based forecasting and machine learning. Dollar-neutral construction. Rebalanced monthly. Optimized via quadratic programming under constraints.
-
-## Investment Thesis
-
-Persistent return premia exist across Momentum, Value, Size, Quality, and Low Volatility factors. Academic literature supports long-term outperformance when held through full market cycles. This strategy combines traditional cross-sectional signals with machine learning models to enhance asset selection and incorporate regime awareness using macroeconomic data.
-
-## Factors Used
-
-Factor             | Signal Description                        | Update Frequency     | Notes
------------------- | ----------------------------------------- | -------------------- | ---------------------------------------------------
-Momentum           | 12-month return minus most recent 1-month | Monthly              | High turnover signal; behavioral alpha source
-Value              | Book-to-price, earnings yield             | Quarterly/Annual     | Mean-reversion effect; long horizon payoff
-Size               | Market capitalization                     | Quarterly            | Captures small-cap premium and liquidity risk
-Quality            | Return on equity, debt-to-assets          | Quarterly            | Outperforms in late cycle / stress regimes
-Low Volatility     | 1Y rolling standard deviation              | Monthly              | Defensive tilt; reduces drawdowns
-Sentiment          | LLM-based scores on earnings calls, 10-Ks | Event-driven         | NLP overlay; incorporated via deep learning
-Technical          | RSI, MACD, MA crossovers                   | Daily/Monthly        | Used for entry and position scaling
-Macro              | CPI, Fed Funds Rate, VIX, Oil, USD Index  | Monthly              | Used for regime flags and signal tilting
-
-## Forecasting Approach
-
-Model: XGBoost and Random Forest  
-Horizon: 3–6 months  
-Features: Standardized and ranked factor inputs, macro indicators, and engineered lags  
-Targets: Forward returns based on rolling window (1000–2000 days)  
-Sentiment Layer: NLP-generated sentiment scores enhance signals where applicable
-
-## Portfolio Construction
-
-Universe: Russell 1000  
-Long/Short: Long top decile, short bottom decile by predicted return  
-Factor Weighting: Equal weights initially; dynamic adjustment tested  
-Asset Weighting: Mean-variance optimization with constraints  
-Constraints: Sector neutrality, max name exposure, beta neutrality  
-Rebalancing: Monthly  
-Turnover: Controlled via trading costs and rebalance threshold
-
-## Macro Regime Adjustment
-
-Macroeconomic variables are not direct signals but inform risk regime filters and factor rotation. Example: shift from momentum to quality in high-volatility, high-inflation regimes.
-
-## Data Sources
-
-Price data: Yahoo Finance (yfinance)  
-Macro data: FRED (via pandas-datareader)  
-Sentiment data: Proprietary NLP pipeline (planned)  
-Storage: Local CSVs under /data/raw/equity and /data/raw/macro
-
-## Tools and Infrastructure
-
-Python (JupyterLab for research, VS Code for production)  
-Libraries: pandas, numpy, scikit-learn, xgboost, mlfinlab, matplotlib  
-Repository structure:
-project/
-├── data/raw/equity/  
-├── data/raw/macro/  
-├── notebooks/  
-├── src/  
-└── README.md
-
-### End-to-end ETL
+## Quick Start
 
 ```bash
-python src/validate_prices.py  # Raunak
-python src/compute_forward_returns.py --prices data/processed/prices_cleaned.parquet \
-                                      --out data/processed/forward_returns.parquet
-
-
+make install
+make test
+make run
 ```
 
-## Next Steps
+Outputs are saved under:
+```
+project/reports/latest/<timestamp>/
+```
+including:
+- `equity_curve.csv`
+- `holdings.csv`
+- `performance_summary.json`
+- `tear_sheet.html`
+- `equity_curve.png`, `drawdown.png`
 
-- Backtest signal on top 50–100 Russell 1000 names
-- Validate Sharpe, drawdown, turnover under different factor weight schemes
-- Implement dynamic factor weighting (HMM or ML-based)
-- Expand to full universe and evaluate live-paper performance
+## Data Limitations (Important)
+
+Russell 1000 membership is **not freely available point-in-time**, so this repo uses a
+**survivorship-biased proxy**:
+- If `project/data/raw/universe.csv` exists, it is used directly.
+- Otherwise, it scrapes the current S&P 500 list from Wikipedia (fallback).
+- If scraping fails, a static large-cap list is used.
+
+To use a true point-in-time universe, replace `project/data/raw/universe.csv` with your own
+PIT universe history and update `src/data/universe.py`.
+
+## Walk-Forward Backtest Design
+
+- Factors computed only with data available up to each rebalance date
+- Forward returns for training are aligned after the feature date
+- Model trained on a rolling window (`train_lookback_months`)
+- Portfolio weights fixed between rebalances
+- Transaction costs applied on turnover at rebalance
+
+## Constraints
+
+- Dollar neutral: sum(w) = 0
+- Gross leverage <= L
+- Max |w_i| <= w_max
+- Beta neutrality vs SPY (tolerance)
+- Turnover penalty + linear costs in bps
+
+## Configuration
+
+Edit `project/configs/default.yaml` to adjust:
+- start/end dates
+- quantiles, leverage, max weights
+- model type (ridge/elasticnet)
+- cost assumptions
+
+## End-to-End Run
+
+```bash
+python project/run_backtest.py --config project/configs/default.yaml
+```
+
+## Sample Outputs
+
+See:
+- `project/reports/latest/<timestamp>/tear_sheet.html`
+- `project/reports/latest/<timestamp>/equity_curve.png`
+- `project/reports/latest/<timestamp>/drawdown.png`
