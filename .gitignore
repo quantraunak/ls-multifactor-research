@@ -7,3 +7,20 @@ data/processed/
 venv/
 venv/
 venv/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Data + caches
+project/data/raw/prices/
+project/data/raw/prices/*.parquet
+project/data/raw/prices/*.csv
+project/data/raw/prices/_manifest.json
+
+# Reports / outputs
+project/reports/
+project/reports/latest/
