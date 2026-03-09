@@ -1,4 +1,4 @@
-# Multi-Factor Long/Short U.S. Equity Strategy (Recruiter-Grade Backtest)
+# Multi-Factor Long/Short U.S. Equity Strategy
 
 A realistic, local, reproducible multi-factor long/short US equity backtesting framework.
 
