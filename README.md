@@ -6,14 +6,16 @@ Systematic long/short equity backtest: walk-forward factor ranking, mean-varianc
 
 | Metric | Value |
 |--------|-------|
-| CAGR | — |
-| Sharpe | — |
-| Max Drawdown | — |
-| Volatility (ann.) | — |
-| Avg Turnover | — |
-| Beta (vs SPY) | — |
+| CAGR | 15.5% |
+| Sharpe | 0.70 |
+| Max Drawdown | −55.5% |
+| Volatility (ann.) | 25.0% |
+| Avg Turnover | 96.9% |
+| Beta (vs SPY) | 0.48 |
 
 > 2010–2024 · Monthly rebalance · 2× gross leverage · Dollar-neutral
+>
+> Drawdown reflects fully invested 2× leverage through all market conditions with no regime filter or dynamic risk scaling.
 
 ![Equity Curve](project/reports/latest/equity_curve.png)
 ![Drawdown](project/reports/latest/drawdown.png)
@@ -53,7 +55,7 @@ A linear model ranks stocks cross-sectionally on momentum, volatility, trend, an
 
 Equal-weight fallback if the solver fails.
 
-**Costs.** 1 bp commission + 2 bp slippage, applied proportionally to turnover at each rebalance.
+**Costs.** 1 bp commission + 2 bp slippage, applied proportionally to turnover at each rebalance. Turnover reflects full cross-sectional re-ranking at each monthly rebalance; all transaction costs are included in reported performance.
 
 ## Key Limitations
 

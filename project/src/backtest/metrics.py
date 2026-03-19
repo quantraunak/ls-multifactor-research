@@ -38,15 +38,36 @@ def hit_rate(returns: pd.Series) -> float:
     return (returns > 0).mean()
 
 
-def summarize(returns: pd.Series, turnovers: list[float], holdings: pd.DataFrame) -> dict:
-    return {
+def annualized_volatility(returns: pd.Series, periods_per_year: int = 252) -> float:
+    if returns.empty:
+        return 0.0
+    return float(returns.std() * np.sqrt(periods_per_year))
+
+
+def beta(returns: pd.Series, market_returns: pd.Series) -> float:
+    aligned = pd.concat([returns, market_returns], axis=1, join="inner").dropna()
+    if aligned.empty or aligned.iloc[:, 1].var() == 0:
+        return 0.0
+    return float(aligned.iloc[:, 0].cov(aligned.iloc[:, 1]) / aligned.iloc[:, 1].var())
+
+
+def summarize(
+    returns: pd.Series,
+    turnovers: list[float],
+    holdings: pd.DataFrame,
+    market_returns: pd.Series | None = None,
+) -> dict:
+    result = {
         "cagr": cagr(returns),
         "sharpe": sharpe(returns),
         "sortino": sortino(returns),
         "max_drawdown": max_drawdown(returns),
+        "annualized_volatility": annualized_volatility(returns),
         "hit_rate": hit_rate(returns),
         "avg_turnover": float(np.mean(turnovers)) if turnovers else 0.0,
         "avg_gross_leverage": float(holdings.abs().sum(axis=1).mean()) if not holdings.empty else 0.0,
         "avg_net_exposure": float(holdings.sum(axis=1).mean()) if not holdings.empty else 0.0,
+        "beta_vs_spy": beta(returns, market_returns) if market_returns is not None else None,
     }
+    return result
 

@@ -90,7 +90,8 @@ def main(config_path: str):
     daily_returns.to_csv(run_dir / "equity_curve.csv", index=True)
     holdings.to_csv(run_dir / "holdings.csv", index=True)
 
-    summary = summarize(daily_returns, results["turnovers"], holdings)
+    spy_returns = price_data.prices["SPY"].pct_change().dropna()
+    summary = summarize(daily_returns, results["turnovers"], holdings, market_returns=spy_returns)
     (run_dir / "performance_summary.json").write_text(json.dumps(summary, indent=2))
 
     generate_tear_sheet(daily_returns, run_dir)
