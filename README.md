@@ -94,6 +94,12 @@ Edit `project/configs/default.yaml` to adjust:
 - Model type (ridge / elasticnet)
 - Cost assumptions
 
+## Next Steps
+
+1. **Point-in-time universe construction.** Replace the survivorship-biased proxy with true historical Russell 1000 membership.
+2. **Improved risk model.** Add covariance shrinkage (Ledoit-Wolf) or a statistical factor model to stabilize the optimizer.
+3. **Paper trading / live pipeline.** Wire the signal and optimizer to a broker API for forward validation.
+
 ## End-to-End Run
 
 ```bash
