@@ -79,6 +79,13 @@ PIT universe history and update `src/data/universe.py`.
 - Beta neutrality vs SPY: `|β'w| ≤ 0.05`
 - Turnover penalty + linear costs (1 bp commission, 2 bp slippage)
 
+## Key Limitations
+
+- **Survivorship-biased universe.** True point-in-time Russell 1000 membership is not freely available. The backtest uses a proxy (S&P 500 scrape or static large-cap list), which overstates the investable universe quality.
+- **Price/volume factors only.** The production pipeline derives all factors from price and volume data. No fundamental inputs (earnings, book value, ROE) enter the live signal.
+- **Sample covariance without shrinkage.** The optimizer uses a trailing 252-day sample covariance matrix with no shrinkage estimator or factor-model structure, which can be noisy for large universes.
+- **Simplified execution model.** Transaction costs are modeled as fixed basis points on turnover (1 bp commission + 2 bp slippage), with no market-impact function or dependence on position size or liquidity.
+
 ## Configuration
 
 Edit `project/configs/default.yaml` to adjust:
