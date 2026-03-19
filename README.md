@@ -1,11 +1,36 @@
 # Multi-Factor Long/Short U.S. Equity Strategy
 
-A realistic, local, reproducible multi-factor long/short US equity backtesting framework.
+## Results
 
-- Dollar-neutral, monthly rebalance
-- Walk-forward training, no lookahead bias
-- Mean-variance optimizer with beta-neutrality and turnover penalty
-- Free data only (Yahoo Finance default; Stooq optional)
+| Metric | Value |
+|--------|-------|
+| CAGR | — |
+| Sharpe | — |
+| Max Drawdown | — |
+| Volatility (ann.) | — |
+| Avg Turnover | — |
+| Beta (vs SPY) | — |
+
+> Backtest period: 2010-01-01 to 2024-12-31. Monthly rebalance, 2× gross leverage, dollar-neutral.
+> Run `make run` to generate results and update this table.
+
+### Equity Curve
+
+![Equity Curve](project/reports/latest/equity_curve.png)
+
+### Drawdown
+
+![Drawdown](project/reports/latest/drawdown.png)
+
+## Why This Is Credible
+
+- **No lookahead bias.** Walk-forward training — the model only sees data available before each rebalance date.
+- **Monthly rebalancing.** Weights are fixed between rebalance dates; no daily re-optimization or curve-fitting.
+- **Transaction costs included.** Commission (1 bp) and slippage (2 bp) are deducted on every turnover event.
+- **Dollar-neutral and beta-neutral.** Portfolio is constrained to zero net exposure and near-zero beta vs SPY.
+- **Realistic portfolio construction.** Mean-variance optimizer with per-name caps, gross leverage limits, and an explicit turnover penalty.
+
+---
 
 ## Quick Start
 
@@ -25,8 +50,9 @@ including:
 - `performance_summary.json`
 - `tear_sheet.html`
 - `equity_curve.png`, `drawdown.png`
+- `factor_ic.csv`, `factor_ic_summary.json`, `factor_ic.png`
 
-## Data Limitations (Important)
+## Data Limitations
 
 Russell 1000 membership is **not freely available point-in-time**, so this repo uses a
 **survivorship-biased proxy**:
@@ -41,35 +67,28 @@ PIT universe history and update `src/data/universe.py`.
 
 - Factors computed only with data available up to each rebalance date
 - Forward returns for training are aligned after the feature date
-- Model trained on a rolling window (`train_lookback_months`)
+- Model trained on a rolling 36-month window
 - Portfolio weights fixed between rebalances
 - Transaction costs applied on turnover at rebalance
 
 ## Constraints
 
-- Dollar neutral: sum(w) = 0
-- Gross leverage <= L
-- Max |w_i| <= w_max
-- Beta neutrality vs SPY (tolerance)
-- Turnover penalty + linear costs in bps
+- Dollar neutral: `sum(w) = 0`
+- Gross leverage: `sum(|w|) ≤ L`
+- Max single-name weight: `|w_i| ≤ 0.02`
+- Beta neutrality vs SPY: `|β'w| ≤ 0.05`
+- Turnover penalty + linear costs (1 bp commission, 2 bp slippage)
 
 ## Configuration
 
 Edit `project/configs/default.yaml` to adjust:
-- start/end dates
-- quantiles, leverage, max weights
-- model type (ridge/elasticnet)
-- cost assumptions
+- Start/end dates
+- Quantiles, leverage, max weights
+- Model type (ridge / elasticnet)
+- Cost assumptions
 
 ## End-to-End Run
 
 ```bash
 python project/run_backtest.py --config project/configs/default.yaml
 ```
-
-## Sample Outputs
-
-See:
-- `project/reports/latest/<timestamp>/tear_sheet.html`
-- `project/reports/latest/<timestamp>/equity_curve.png`
-- `project/reports/latest/<timestamp>/drawdown.png`
