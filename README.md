@@ -17,8 +17,8 @@ Systematic long/short equity backtest: walk-forward factor ranking, mean-varianc
 >
 > Drawdown reflects fully invested 2× leverage through all market conditions with no regime filter or dynamic risk scaling.
 
-![Equity Curve](project/reports/latest/equity_curve.png)
-![Drawdown](project/reports/latest/drawdown.png)
+![Equity Curve](assets/equity_curve.png)
+![Drawdown](assets/drawdown.png)
 
 ## Why This Is Credible
 
